@@ -139,7 +139,7 @@ interface VideoStoreState {
   getCurrentVideo: () => Video | null;
 }
 
-const CURRENT_VIDEO_STORE_VERSION = 7; // Clean ID-based version
+const CURRENT_VIDEO_STORE_VERSION = 8; // Force migration to HumAi Club videos
 
 const getInitialState = () => ({
   videos: DEFAULT_VIDEOS,
@@ -199,8 +199,8 @@ export const useVideoStore = create<VideoStoreState>()(
       name: "ryos:videos",
       version: CURRENT_VIDEO_STORE_VERSION,
       migrate: () => {
-        console.log(`Migrating video store to clean ID-based version ${CURRENT_VIDEO_STORE_VERSION}`);
-        // Always reset to defaults for clean start
+        console.log(`Migrating video store to HumAi Club videos version ${CURRENT_VIDEO_STORE_VERSION}`);
+        // Always reset to defaults with HumAi Club videos for clean start
         return getInitialState();
       },
       // Persist videos array to prevent ID-based errors
@@ -213,4 +213,4 @@ export const useVideoStore = create<VideoStoreState>()(
       }),
     }
   )
-);  
+);      
