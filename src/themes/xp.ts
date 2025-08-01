@@ -41,7 +41,7 @@ export const xp: OsTheme = {
     windowShadow: "0 4px 8px rgba(0,0,0,0.25)",
   },
   wallpaperDefaults: {
-    photo: "/wallpapers/photos/landscapes/bliss.jpg",
+    photo: "/wallpapers/photos/custom/humai-bg_1.png",
     video: "/wallpapers/videos/bliss_og.mp4",
   },
 };

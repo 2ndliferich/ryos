@@ -177,6 +177,12 @@
       "photos/graphics/ufo_1.jpg",
       "photos/graphics/ufo_2.jpg",
       "photos/graphics/ufo_3.jpg"
+    ],
+    "custom": [
+      "photos/custom/humai-bg_1.png",
+      "photos/custom/dsw-bg_1.png",
+      "photos/custom/2ndlr2.png",
+      "photos/custom/2ndlr3.png"
     ]
   },
   "videos": [

@@ -5,7 +5,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectSeparator,
 } from "@/components/ui/select";
 import { useWallpaper } from "@/hooks/useWallpaper";
 import { useSound, Sounds } from "@/hooks/useSound";
@@ -127,7 +126,6 @@ function WallpaperItem({
   );
 }
 
-type PhotoCategory = string;
 
 // Wallpaper data will be loaded from the generated manifest at runtime.
 interface WallpaperPickerProps {
@@ -166,31 +164,22 @@ export function WallpaperPicker({ onSelect }: WallpaperPickerProps) {
     () => (manifest ? manifest.videos.map((p) => `/wallpapers/${p}`) : []),
     [manifest]
   );
-  const photoWallpapers = useMemo(() => {
-    if (!manifest) return {} as Record<string, string[]>;
-    const r: Record<string, string[]> = {};
-    for (const [cat, arr] of Object.entries(manifest.photos)) {
-      r[cat] = arr.map((p) => `/wallpapers/${p}`);
+  const allPhotoWallpapers = useMemo(() => {
+    if (!manifest) return [];
+    const allPhotos: string[] = [];
+    for (const arr of Object.values(manifest.photos)) {
+      allPhotos.push(...arr.map((p) => `/wallpapers/${p}`));
     }
-    return r;
+    return allPhotos;
   }, [manifest]);
-  const photoCategories = Object.keys(photoWallpapers);
-  const photoCategoriesSorted = useMemo(
-    () =>
-      photoCategories
-        .filter((cat) => cat !== "custom" && cat !== "videos")
-        .sort((a, b) => a.localeCompare(b)),
-    [photoCategories]
-  );
 
   const [selectedCategory, setSelectedCategory] = useState<
-    "tiles" | PhotoCategory
+    "tiles" | "videos" | "images" | "custom"
   >(() => {
     if (currentWallpaper.includes("/wallpapers/tiles/")) return "tiles";
     if (currentWallpaper.startsWith(INDEXEDDB_PREFIX)) return "custom";
     if (currentWallpaper.includes("/wallpapers/videos/")) return "videos";
-    const match = currentWallpaper.match(/\/wallpapers\/photos\/([^/]+)\//);
-    if (match) return match[1];
+    if (currentWallpaper.includes("/wallpapers/photos/")) return "images";
     return "tiles";
   });
 
@@ -281,18 +270,11 @@ export function WallpaperPicker({ onSelect }: WallpaperPickerProps) {
       setSelectedCategory("custom");
     } else if (currentWallpaper.includes("/wallpapers/videos/")) {
       setSelectedCategory("videos");
-    } else {
-      const match = currentWallpaper.match(/\/wallpapers\/photos\/([^/]+)\//);
-      if (match) setSelectedCategory(match[1]);
+    } else if (currentWallpaper.includes("/wallpapers/photos/")) {
+      setSelectedCategory("images");
     }
   }, [currentWallpaper, INDEXEDDB_PREFIX]);
 
-  const formatCategoryLabel = (category: string) => {
-    return category
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  };
 
   // Determine if a wallpaper is a video
   const isVideoWallpaper = (path: string, previewUrl?: string) => {
@@ -320,21 +302,8 @@ export function WallpaperPicker({ onSelect }: WallpaperPickerProps) {
             <SelectContent>
               <SelectItem value="videos">Videos</SelectItem>
               <SelectItem value="tiles">Patterns</SelectItem>
+              <SelectItem value="images">Images</SelectItem>
               <SelectItem value="custom">Custom</SelectItem>
-              <SelectSeparator
-                className="-mx-1 my-1 h-px"
-                style={{
-                  backgroundColor: "rgba(0, 0, 0, 0.15)",
-                  border: "none",
-                  margin: "4px 0",
-                  height: "1px",
-                }}
-              />
-              {photoCategoriesSorted.map((category) => (
-                <SelectItem key={category} value={category}>
-                  {formatCategoryLabel(category)}
-                </SelectItem>
-              ))}
             </SelectContent>
           </Select>
         </div>
@@ -393,6 +362,15 @@ export function WallpaperPicker({ onSelect }: WallpaperPickerProps) {
                 isVideo
               />
             ))
+          ) : selectedCategory === "images" ? (
+            allPhotoWallpapers.map((path) => (
+              <WallpaperItem
+                key={path}
+                path={path}
+                isSelected={currentWallpaper === path}
+                onClick={() => handleWallpaperSelect(path)}
+              />
+            ))
           ) : selectedCategory === "custom" ? (
             <>
               <div
@@ -419,15 +397,6 @@ export function WallpaperPicker({ onSelect }: WallpaperPickerProps) {
                 <></>
               )}
             </>
-          ) : photoWallpapers[selectedCategory] ? (
-            photoWallpapers[selectedCategory].map((path) => (
-              <WallpaperItem
-                key={path}
-                path={path}
-                isSelected={currentWallpaper === path}
-                onClick={() => handleWallpaperSelect(path)}
-              />
-            ))
           ) : (
             <div className="col-span-4 text-center py-8 text-gray-500">
               Photos coming soon for this category...
