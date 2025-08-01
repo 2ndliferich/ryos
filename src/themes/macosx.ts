@@ -54,7 +54,7 @@ export const macosx: OsTheme = {
     windowShadow: "0 8px 25px rgba(0,0,0,0.5)",
   },
   wallpaperDefaults: {
-    photo: "/wallpapers/photos/aqua/abstract-7.jpg",
+    photo: "/wallpapers/photos/custom/humai-bg_1.png",
     video: "/wallpapers/videos/blue_flowers_loop.mp4",
   },
 };

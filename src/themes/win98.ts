@@ -42,6 +42,7 @@ export const win98: OsTheme = {
     windowShadow: "none",
   },
   wallpaperDefaults: {
+    photo: "/wallpapers/photos/custom/humai-bg_1.png",
     tile: "/wallpapers/tiles/bondi.png",
     video: "/wallpapers/videos/blue_flowers_loop.mp4",
   },
