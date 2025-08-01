@@ -164,22 +164,30 @@ export function WallpaperPicker({ onSelect }: WallpaperPickerProps) {
     () => (manifest ? manifest.videos.map((p) => `/wallpapers/${p}`) : []),
     [manifest]
   );
-  const allPhotoWallpapers = useMemo(() => {
+  const humaiWallpapers = useMemo(() => {
+    if (!manifest || !manifest.photos.custom) return [];
+    return manifest.photos.custom.map((p) => `/wallpapers/${p}`);
+  }, [manifest]);
+  
+  const natureWallpapers = useMemo(() => {
     if (!manifest) return [];
-    const allPhotos: string[] = [];
-    for (const arr of Object.values(manifest.photos)) {
-      allPhotos.push(...arr.map((p) => `/wallpapers/${p}`));
+    const naturePhotos: string[] = [];
+    for (const [category, arr] of Object.entries(manifest.photos)) {
+      if (category !== "custom") {
+        naturePhotos.push(...arr.map((p) => `/wallpapers/${p}`));
+      }
     }
-    return allPhotos;
+    return naturePhotos;
   }, [manifest]);
 
   const [selectedCategory, setSelectedCategory] = useState<
-    "tiles" | "videos" | "images" | "custom"
+    "tiles" | "videos" | "nature" | "humai" | "custom"
   >(() => {
     if (currentWallpaper.includes("/wallpapers/tiles/")) return "tiles";
     if (currentWallpaper.startsWith(INDEXEDDB_PREFIX)) return "custom";
     if (currentWallpaper.includes("/wallpapers/videos/")) return "videos";
-    if (currentWallpaper.includes("/wallpapers/photos/")) return "images";
+    if (currentWallpaper.includes("/wallpapers/photos/custom/")) return "humai";
+    if (currentWallpaper.includes("/wallpapers/photos/")) return "nature";
     return "tiles";
   });
 
@@ -270,8 +278,10 @@ export function WallpaperPicker({ onSelect }: WallpaperPickerProps) {
       setSelectedCategory("custom");
     } else if (currentWallpaper.includes("/wallpapers/videos/")) {
       setSelectedCategory("videos");
+    } else if (currentWallpaper.includes("/wallpapers/photos/custom/")) {
+      setSelectedCategory("humai");
     } else if (currentWallpaper.includes("/wallpapers/photos/")) {
-      setSelectedCategory("images");
+      setSelectedCategory("nature");
     }
   }, [currentWallpaper, INDEXEDDB_PREFIX]);
 
@@ -300,9 +310,10 @@ export function WallpaperPicker({ onSelect }: WallpaperPickerProps) {
               <SelectValue placeholder="Select a category" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="humai">HumAi</SelectItem>
               <SelectItem value="videos">Videos</SelectItem>
               <SelectItem value="tiles">Patterns</SelectItem>
-              <SelectItem value="images">Images</SelectItem>
+              <SelectItem value="nature">Nature</SelectItem>
               <SelectItem value="custom">Custom</SelectItem>
             </SelectContent>
           </Select>
@@ -362,8 +373,17 @@ export function WallpaperPicker({ onSelect }: WallpaperPickerProps) {
                 isVideo
               />
             ))
-          ) : selectedCategory === "images" ? (
-            allPhotoWallpapers.map((path) => (
+          ) : selectedCategory === "humai" ? (
+            humaiWallpapers.map((path) => (
+              <WallpaperItem
+                key={path}
+                path={path}
+                isSelected={currentWallpaper === path}
+                onClick={() => handleWallpaperSelect(path)}
+              />
+            ))
+          ) : selectedCategory === "nature" ? (
+            natureWallpapers.map((path) => (
               <WallpaperItem
                 key={path}
                 path={path}
