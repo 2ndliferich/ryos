@@ -606,65 +606,17 @@ export const useChatsStore = create<ChatsStoreState>()(
             return { ok: true };
           }
 
-          // Username exists but no token, generate one
+          // Username exists but no token - this should not happen after password auth
           console.log(
-            "[ChatsStore] Generating auth token for existing user:",
-            currentUsername
+            "[ChatsStore] No auth token found for user:",
+            currentUsername,
+            "- user may need to log in again"
           );
-
-          try {
-            const response = await fetch(
-              "/api/chat-rooms?action=generateToken",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  ...(currentToken
-                    ? {
-                        Authorization: `Bearer ${currentToken}`,
-                        "X-Username": currentUsername,
-                      }
-                    : {}),
-                },
-                body: JSON.stringify({ username: currentUsername }),
-              }
-            );
-
-            const data = await response.json();
-
-            if (response.ok && data.token) {
-              console.log("[ChatsStore] Auth token generated successfully");
-              set({ authToken: data.token });
-              saveAuthTokenToRecovery(data.token);
-              // Save token creation time
-              saveTokenRefreshTime(currentUsername);
-              return { ok: true };
-            } else if (response.status === 401) {
-              return { ok: false, error: "Authentication required" };
-            } else if (response.status === 409) {
-              // Token already exists on server, this shouldn't happen but handle it
-              console.warn(
-                "[ChatsStore] Token already exists on server for user:",
-                currentUsername
-              );
-              return { ok: false, error: "Token already exists on server" };
-            } else {
-              console.error(
-                "[ChatsStore] Failed to generate auth token:",
-                data.error
-              );
-              return {
-                ok: false,
-                error: data.error || "Failed to generate auth token",
-              };
-            }
-          } catch (error) {
-            console.error("[ChatsStore] Error generating auth token:", error);
-            return {
-              ok: false,
-              error: "Network error while generating auth token",
-            };
-          }
+          
+          return { 
+            ok: false, 
+            error: "Authentication required - please log in again" 
+          };
         },
         refreshAuthToken: async () => {
           const currentUsername = get().username;
