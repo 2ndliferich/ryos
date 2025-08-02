@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useChat, type Message } from "ai/react";
 import { useChatsStore } from "../../../stores/useChatsStore";
 import { useAppStore } from "@/stores/useAppStore";
@@ -324,12 +324,14 @@ export function useAiChat(onPromptSetUsername?: () => void) {
   const [needsUsername, setNeedsUsername] = useState(false);
 
   // Prepare headers for API calls – include auth token & username when available
-  const apiHeaders: Record<string, string> | undefined = username
-    ? {
-        "X-Username": username,
-        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-      }
-    : undefined;
+  const apiHeaders: Record<string, string> | undefined = useMemo(() => {
+    return username
+      ? {
+          "X-Username": username,
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        }
+      : undefined;
+  }, [username, authToken]);
 
   // --- AI Chat Hook (Vercel AI SDK) ---
   const {
