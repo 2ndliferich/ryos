@@ -212,7 +212,7 @@ async function originalHandler(req: Request) {
 
     // Prepend the dynamic prompt as a system message
     const enrichedMessages = [
-      { role: "system", content: systemPrompt },
+      { role: "system" as const, content: systemPrompt },
       ...messages,
     ];
 
@@ -293,4 +293,4 @@ export const handler = async (event, context) => {
   });
   
   return await originalHandler(request);
-};                                                        
+};                                                                
