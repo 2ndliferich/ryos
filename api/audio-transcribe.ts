@@ -18,7 +18,7 @@ export const config = {
 
 const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024; // 2MB limit imposed by OpenAI
 
-export default async function handler(req: Request) {
+export default async function originalHandler(req: Request) {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
   }
@@ -85,12 +85,27 @@ export default async function handler(req: Request) {
   }
 }
 
-export const netlifyHandler = async (event, context) => {
-  const request = new Request(event.rawUrl || `https://${event.headers.host}${event.path}`, {
-    method: event.httpMethod,
-    headers: event.headers,
-    body: event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD' ? event.body : undefined
-  });
-  
-  return await handler(request);
+export const handler = async (event, context) => {
+  try {
+    const request = new Request(event.rawUrl || `https://${event.headers.host}${event.path}`, {
+      method: event.httpMethod,
+      headers: event.headers,
+      body: event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD' ? event.body : undefined
+    });
+    
+    const response = await originalHandler(request);
+    
+    return {
+      statusCode: response.status,
+      headers: Object.fromEntries(response.headers.entries()),
+      body: await response.text()
+    };
+  } catch (error) {
+    console.error('Netlify function error:', error);
+    return {
+      statusCode: 500,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ error: 'Internal server error' })
+    };
+  }
 };

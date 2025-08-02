@@ -132,7 +132,7 @@ ${RYO_PERSONA_INSTRUCTIONS}`;
   return finalPrompt;
 };
 
-export default async function handler(req: Request) {
+async function originalHandler(req: Request) {
   // CORS / Origin validation
   const origin = req.headers.get("origin");
   if (!isValidOrigin(origin)) {
@@ -212,7 +212,7 @@ export default async function handler(req: Request) {
 
     // Prepend the dynamic prompt as a system message
     const enrichedMessages = [
-      { role: "system", content: systemPrompt },
+      { role: "system" as const, content: systemPrompt },
       ...messages,
     ];
 
@@ -283,12 +283,14 @@ export default async function handler(req: Request) {
   }
 }
 
-export const netlifyHandler = async (event, context) => {
+export default originalHandler;
+
+export const handler = async (event, context) => {
   const request = new Request(event.rawUrl || `https://${event.headers.host}${event.path}`, {
     method: event.httpMethod,
     headers: event.headers,
     body: event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD' ? event.body : undefined
   });
   
-  return await handler(request);
-};                    
+  return await originalHandler(request);
+};                                                                
