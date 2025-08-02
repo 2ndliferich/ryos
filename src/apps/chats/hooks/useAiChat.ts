@@ -333,6 +333,11 @@ export function useAiChat(onPromptSetUsername?: () => void) {
       : undefined;
   }, [username, authToken]);
 
+  // Create a unique key to force useChat hook to reinitialize when auth changes
+  const chatKey = useMemo(() => {
+    return `${username || 'anonymous'}-${authToken || 'no-token'}`;
+  }, [username, authToken]);
+
   // --- AI Chat Hook (Vercel AI SDK) ---
   const {
     messages: currentSdkMessages,
@@ -355,6 +360,7 @@ export function useAiChat(onPromptSetUsername?: () => void) {
       model: aiModel, // Pass the selected AI model
     },
     maxSteps: 25,
+    id: chatKey, // Force reinitialize when auth changes
     onResponse: (response) => {
       // Check for refreshed token in response headers
       const newToken = response.headers.get("X-New-Auth-Token");
