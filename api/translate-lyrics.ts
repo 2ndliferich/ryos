@@ -84,7 +84,7 @@ const logError = (id: string, message: string, error: unknown) => {
 const generateRequestId = (): string =>
   Math.random().toString(36).substring(2, 10);
 
-export default async function handler(req: Request) {
+export default async function originalHandler(req: Request) {
   const requestId = generateRequestId();
   logRequest(req.method, req.url, null, requestId);
 
@@ -219,5 +219,5 @@ export const handler = async (event, context) => {
     body: event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD' ? event.body : undefined
   });
   
-  return await handler(request);
+  return await originalHandler(request);
 };

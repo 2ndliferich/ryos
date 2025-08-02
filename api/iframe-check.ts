@@ -154,7 +154,7 @@ const WAYBACK_CACHE_PREFIX = "wayback:cache:";
  * blocked accidentally (the front‑end still has its own error handling for actual iframe errors).
  */
 
-export default async function handler(req: Request) {
+export default async function originalHandler(req: Request) {
   const { searchParams } = new URL(req.url);
   const urlParam = searchParams.get("url");
   let mode = searchParams.get("mode") || "proxy"; // "check" | "proxy" | "ai" | "list-cache"
@@ -912,5 +912,5 @@ export const handler = async (event, context) => {
     body: event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD' ? event.body : undefined
   });
   
-  return await handler(request);
+  return await originalHandler(request);
 };

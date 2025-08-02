@@ -459,7 +459,7 @@ async function validateAuthToken(
   return { valid: false };
 }
 
-export default async function handler(req: Request) {
+export default async function originalHandler(req: Request) {
   // Check origin before processing request
   const origin = req.headers.get("origin");
   if (!isValidOrigin(origin)) {
@@ -972,5 +972,5 @@ export const handler = async (event, context) => {
     body: event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD' ? event.body : undefined
   });
   
-  return await handler(request);
+  return await originalHandler(request);
 };

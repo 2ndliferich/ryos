@@ -18,7 +18,7 @@ export const config = {
 
 const MAX_FILE_SIZE_BYTES = 2 * 1024 * 1024; // 2MB limit imposed by OpenAI
 
-export default async function handler(req: Request) {
+export default async function originalHandler(req: Request) {
   if (req.method !== "POST") {
     return new Response("Method not allowed", { status: 405 });
   }
@@ -92,5 +92,5 @@ export const handler = async (event, context) => {
     body: event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD' ? event.body : undefined
   });
   
-  return await handler(request);
+  return await originalHandler(request);
 };

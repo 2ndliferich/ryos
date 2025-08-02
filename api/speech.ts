@@ -122,7 +122,7 @@ const generateElevenLabsSpeech = async (
   return await response.arrayBuffer();
 };
 
-export default async function handler(req: Request) {
+export default async function originalHandler(req: Request) {
   // Generate a request ID and log the incoming request
   const requestId = generateRequestId();
   const startTime =
@@ -263,5 +263,5 @@ export const handler = async (event, context) => {
     body: event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD' ? event.body : undefined
   });
   
-  return await handler(request);
+  return await originalHandler(request);
 };
