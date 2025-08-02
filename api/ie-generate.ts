@@ -281,4 +281,14 @@ export default async function handler(req: Request) {
 
     return new Response("Internal Server Error", { status: 500 });
   }
-}    
+}
+
+export const netlifyHandler = async (event, context) => {
+  const request = new Request(event.rawUrl || `https://${event.headers.host}${event.path}`, {
+    method: event.httpMethod,
+    headers: event.headers,
+    body: event.body
+  });
+  
+  return await handler(request);
+};            

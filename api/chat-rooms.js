@@ -3657,3 +3657,22 @@ const checkRateLimit = async (action, identifier, requestId) => {
     return true;
   }
 };
+
+export const handler = async (event, context) => {
+  const request = new Request(event.rawUrl || `https://${event.headers.host}${event.path}`, {
+    method: event.httpMethod,
+    headers: event.headers,
+    body: event.body
+  });
+  
+  switch (event.httpMethod) {
+    case 'GET':
+      return await GET(request);
+    case 'POST':
+      return await POST(request);
+    case 'DELETE':
+      return await DELETE(request);
+    default:
+      return new Response('Method not allowed', { status: 405 });
+  }
+};
