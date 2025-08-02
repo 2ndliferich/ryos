@@ -370,6 +370,8 @@ export function useAiChat(onPromptSetUsername?: () => void) {
     maxSteps: 25,
     id: `${chatKey}-${useChatKey}`, // Force reinitialize when auth changes
     onResponse: (response) => {
+      console.log(`[useAiChat] API response status: ${response.status}`);
+      
       // Check for refreshed token in response headers
       const newToken = response.headers.get("X-New-Auth-Token");
       if (newToken) {
@@ -1125,9 +1127,19 @@ export function useAiChat(onPromptSetUsername?: () => void) {
             if (
               errorData.error === "authentication_failed" ||
               errorData.error === "unauthorized" ||
-              errorData.error === "username mismatch"
+              errorData.error === "username mismatch" ||
+              errorData.status === 401 // Only clear token for 401 Unauthorized errors
             ) {
               handleAuthError("Your session has expired. Please login again.");
+              return; // Exit early to prevent showing generic error toast
+            }
+            
+            if (errorData.status === 403 || errorData.error === "forbidden") {
+              console.error("Server access forbidden - this might be an origin validation issue, not an invalid token");
+              toast.error("Server Error", {
+                description: "Unable to access the server. Please try again later.",
+                duration: 5000,
+              });
               return; // Exit early to prevent showing generic error toast
             }
           } catch (parseError) {
@@ -1168,6 +1180,36 @@ export function useAiChat(onPromptSetUsername?: () => void) {
           err.message.includes("Username mismatch")
         ) {
           handleAuthError();
+          return;
+        }
+        
+        // Check if error message contains 403 status (forbidden error)
+        // This catches various 403 error formats but DOESN'T clear the token
+        if (
+          err.message.includes("403") ||
+          err.message.includes("Forbidden") ||
+          err.message.includes("forbidden")
+        ) {
+          console.error("Server access forbidden - this might be an origin validation issue, not an invalid token");
+          toast.error("Server Error", {
+            description: "Unable to access the server. Please try again later.",
+            duration: 5000,
+          });
+          return;
+        }
+        
+        // Check if error message contains 403 status (forbidden error)
+        // This catches various 403 error formats but DOESN'T clear the token
+        if (
+          err.message.includes("403") ||
+          err.message.includes("Forbidden") ||
+          err.message.includes("forbidden")
+        ) {
+          console.error("Server access forbidden - this might be an origin validation issue, not an invalid token");
+          toast.error("Server Error", {
+            description: "Unable to access the server. Please try again later.",
+            duration: 5000,
+          });
           return;
         }
       }
