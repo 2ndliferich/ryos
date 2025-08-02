@@ -287,8 +287,8 @@ export const netlifyHandler = async (event, context) => {
   const request = new Request(event.rawUrl || `https://${event.headers.host}${event.path}`, {
     method: event.httpMethod,
     headers: event.headers,
-    body: event.body
+    body: event.httpMethod !== 'GET' && event.httpMethod !== 'HEAD' ? event.body : undefined
   });
   
   return await handler(request);
-};            
+};                    
