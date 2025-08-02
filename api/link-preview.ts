@@ -264,7 +264,7 @@ export default async function handler(req: Request) {
   }
 }
 
-export const netlifyHandler = async (event, context) => {
+export const handler = async (event, context) => {
   const request = new Request(event.rawUrl || `https://${event.headers.host}${event.path}`, {
     method: event.httpMethod,
     headers: event.headers,

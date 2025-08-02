@@ -212,7 +212,7 @@ Do not include timestamps or any other formatting in your output strings; just t
   }
 }
 
-export const netlifyHandler = async (event, context) => {
+export const handler = async (event, context) => {
   const request = new Request(event.rawUrl || `https://${event.headers.host}${event.path}`, {
     method: event.httpMethod,
     headers: event.headers,
