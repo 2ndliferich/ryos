@@ -1197,21 +1197,6 @@ export function useAiChat(onPromptSetUsername?: () => void) {
           });
           return;
         }
-        
-        // Check if error message contains 403 status (forbidden error)
-        // This catches various 403 error formats but DOESN'T clear the token
-        if (
-          err.message.includes("403") ||
-          err.message.includes("Forbidden") ||
-          err.message.includes("forbidden")
-        ) {
-          console.error("Server access forbidden - this might be an origin validation issue, not an invalid token");
-          toast.error("Server Error", {
-            description: "Unable to access the server. Please try again later.",
-            duration: 5000,
-          });
-          return;
-        }
       }
 
       // For non-rate-limit errors, show the generic error toast
