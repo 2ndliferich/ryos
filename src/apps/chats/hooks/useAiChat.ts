@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useChat, type Message } from "ai/react";
 import { useChatsStore } from "../../../stores/useChatsStore";
 import { useAppStore } from "@/stores/useAppStore";
@@ -324,12 +324,27 @@ export function useAiChat(onPromptSetUsername?: () => void) {
   const [needsUsername, setNeedsUsername] = useState(false);
 
   // Prepare headers for API calls – include auth token & username when available
-  const apiHeaders: Record<string, string> | undefined = username
-    ? {
-        "X-Username": username,
-        ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
-      }
-    : undefined;
+  const apiHeaders: Record<string, string> | undefined = useMemo(() => {
+    console.log('[useAiChat] Creating headers with:', { username, authToken: authToken ? 'present' : 'null' });
+    return username
+      ? {
+          "X-Username": username,
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+        }
+      : undefined;
+  }, [username, authToken]);
+
+  // Create a unique key to force useChat hook to reinitialize when auth changes
+  const chatKey = useMemo(() => {
+    return `${username || 'anonymous'}-${authToken ? authToken.slice(0, 8) : 'no-token'}`;
+  }, [username, authToken]);
+
+  const [useChatKey, setUseChatKey] = useState(0);
+  
+  useEffect(() => {
+    console.log('[useAiChat] Auth state changed, forcing useChat reinit:', { username, authToken: authToken ? 'present' : 'null' });
+    setUseChatKey(prev => prev + 1);
+  }, [username, authToken]);
 
   // --- AI Chat Hook (Vercel AI SDK) ---
   const {
@@ -353,6 +368,7 @@ export function useAiChat(onPromptSetUsername?: () => void) {
       model: aiModel, // Pass the selected AI model
     },
     maxSteps: 25,
+    id: `${chatKey}-${useChatKey}`, // Force reinitialize when auth changes
     onResponse: (response) => {
       // Check for refreshed token in response headers
       const newToken = response.headers.get("X-New-Auth-Token");
